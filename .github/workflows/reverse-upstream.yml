@@ -10,13 +10,13 @@ permissions:
 
 jobs:
   sync-from-consumer:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-dind
 
     steps:
       - name: Checkout shared repo
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GH_TOKEN }}
           fetch-depth: 0  # Required for subtree operations
 
       - name: Install yq (Go version)
@@ -53,7 +53,7 @@ jobs:
 
       - name: Pull from consumer and inject into shared
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           set -e
 
@@ -88,7 +88,7 @@ jobs:
           # Clone consumer repo
           TMPDIR=$(mktemp -d)
           cd "$TMPDIR"
-          git clone "https://${GH_PAT}@${CONSUMER_REPO#https://}" consumer
+          git clone "https://${GH_TOKEN}@${CONSUMER_REPO#https://}" consumer
           cd consumer
 
           # Checkout specific commit SHA
@@ -141,7 +141,7 @@ jobs:
             fi
 
             # Configure git remote with PAT for authenticated push
-            git remote set-url origin "https://${GH_PAT}@github.com/moophat/SRR-shared-resources.git"
+            git remote set-url origin "https://${GH_TOKEN}@github.com/moophat/SRR-shared-resources.git"
 
             # Push branch (normal push, not force)
             echo "⬆️ Pushing branch to origin"
@@ -151,7 +151,7 @@ jobs:
 
             # Trigger auto-PR workflow
             echo "📝 Triggering auto-PR workflow"
-            GH_TOKEN="$GH_PAT" gh workflow run auto-pr-upstream.yml \
+            GH_TOKEN="$GH_TOKEN" gh workflow run auto-pr-upstream.yml \
               -f consumer="$CONSUMER" \
               -f folder="$FOLDER" \
               -f branch="$BRANCH_NAME" \

@@ -30,7 +30,7 @@ permissions:
 
 jobs:
   create-pr:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-dind
 
     steps:
       - name: Checkout shared repo

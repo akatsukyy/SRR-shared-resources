@@ -11,7 +11,7 @@ on:
 
 jobs:
   sync:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-dind
 
     steps:
       - name: Checkout shared repo
@@ -31,7 +31,7 @@ jobs:
 
       - name: Run downstream sync
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           set -e
 
@@ -53,7 +53,7 @@ jobs:
 
             # Clone consumer repo once
             cd "$TMPDIR"
-            git clone "https://${GH_PAT}@${REPO#https://}" "$consumer"
+            git clone "https://${GH_TOKEN}@${REPO#https://}" "$consumer"
             cd "$consumer"
 
             # Set git identity for commits
