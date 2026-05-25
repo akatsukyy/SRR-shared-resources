@@ -133,14 +133,19 @@ jobs:
               BODY="Upstream sync from consumer: **$CONSUMER**"$'\n\n'"- Folder: \`$FOLDER\`"
             fi
 
-            gh pr create \
+            if PR_URL=$(gh pr create \
               --title "Sync $FOLDER from $CONSUMER" \
               --body "$BODY" \
               --base main \
-              --head "$branch"
+              --head "$branch" 2>&1); then
+              
+              echo "  ✅ Created PR for $branch: $PR_URL"
+              PR_COUNT=$((PR_COUNT + 1))
+            else
+              echo "  ❌ Failed to create PR for $branch"
+              echo "  Error details: $PR_URL"
 
-            echo "  ✅ Created PR for $branch"
-            PR_COUNT=$((PR_COUNT + 1))
+            fi
           done
 
           echo ""

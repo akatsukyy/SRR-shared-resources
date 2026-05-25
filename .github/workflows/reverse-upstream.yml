@@ -151,14 +151,28 @@ jobs:
 
             # Trigger auto-PR workflow
             echo "📝 Triggering auto-PR workflow"
-            GH_TOKEN="$GH_TOKEN" gh workflow run auto-pr-upstream.yml \
+            if GH_TOKEN="$GH_TOKEN" gh workflow run auto2-pr-upstream.yml \
               -f consumer="$CONSUMER" \
               -f folder="$FOLDER" \
               -f branch="$BRANCH_NAME" \
               -f commit_sha="$COMMIT_SHA" \
-              -f commit_message="$COMMIT_MSG"
+              -f commit_message="$COMMIT_MSG"; then
 
-            echo "✅ Auto-PR workflow triggered"
+              sleep 10 # Wait a moment for the workflow to be registered
+
+              RUN_URL=$(gh run list \
+              --workflow=auto-pr-upstream.yml \
+              --branch="$BRANCH_NAME" \
+              --limit=1 \
+              --json url \
+              --jq '.[0].url')
+
+              echo "✅ Auto-PR workflow triggered"
+              echo "::notice title=Auto-PR Workflow::View run: $RUN_URL"
+            else
+              echo "⚠️ Warning: Failed to trigger auto-PR workflow"
+              echo "::warning title=Auto-PR Failed::Branch $BRANCH_NAME pushed but auto-PR failed. Run scan mode to create PR manually."
+            fi
           fi
 
           # Cleanup
