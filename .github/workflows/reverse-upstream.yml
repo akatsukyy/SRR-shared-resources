@@ -149,7 +149,11 @@ jobs:
 
             echo "✅ Successfully created branch: $BRANCH_NAME"
 
-            # Trigger auto-PR workflow
+            # Trigger PR creation workflow
+            AUTO_PR_UPSTREAM_WORKFLOW="auto-pr-upstream.yml"
+            REPO_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+            PR_WORKFLOW_URL="$REPO_URL/actions/workflows/$AUTO_PR_UPSTREAM_WORKFLOW"
+
             echo "📝 Triggering auto-PR workflow"
             if GH_TOKEN="$GH_TOKEN" gh workflow run auto2-pr-upstream.yml \
               -f consumer="$CONSUMER" \
@@ -158,20 +162,12 @@ jobs:
               -f commit_sha="$COMMIT_SHA" \
               -f commit_message="$COMMIT_MSG"; then
 
-              sleep 10 # Wait a moment for the workflow to be registered
-
-              RUN_URL=$(gh run list \
-              --workflow=auto-pr-upstream.yml \
-              --branch="$BRANCH_NAME" \
-              --limit=1 \
-              --json url \
-              --jq '.[0].url')
-
-              echo "✅ Auto-PR workflow triggered"
-              echo "::notice title=Auto-PR Workflow::View run: $RUN_URL"
+              echo "✅ Auto-PR workflow triggered successfully"
+              echo "::notice title=PR Workflow Triggered::Workflow '$AUTO_PR_UPSTREAM_WORKFLOW' triggered for branch '$BRANCH_NAME'"
             else
-              echo "⚠️ Warning: Failed to trigger auto-PR workflow"
-              echo "::warning title=Auto-PR Failed::Branch $BRANCH_NAME pushed but auto-PR failed. Run scan mode to create PR manually."
+              echo "❌ Failed to trigger PR creation workflow"
+                echo "::error title=Manual PR Creation Required::Branch '$BRANCH_NAME' was pushed successfully, but PR creation workflow trigger failed. Please run workflow '$AUTO_PR_UPSTREAM_WORKFLOW' manually: $PR_WORKFLOW_URL"
+                exit 1
             fi
           fi
 
